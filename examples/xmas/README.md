@@ -35,19 +35,19 @@ curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/tasks' \
       "name": "merry-xmas",
       "command": "python examples/xmas/xmas.py",
       "runner": "kriten-xmas-example",
-        "schema": {
-          "required": [
-            "from"
-          ],
-          "properties": {
-            "from": {
-              "type": "string", 
-                "pattern": "^[A-Za-z0-9-]+$",
-                  "minLength": 1
-              }
-          },
-          "additionalProperties": false
-        }
+      "schema": {
+        "required": [
+          "from"
+        ],
+        "properties": {
+          "from": {
+            "type": "string", 
+            "pattern": "^[A-Za-z0-9-]+$",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      },
       "synchronous": true
     }'
 ```
