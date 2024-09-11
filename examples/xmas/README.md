@@ -47,8 +47,7 @@ curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/tasks' \
           }
         },
         "additionalProperties": false
-      },
-      "synchronous": true
+      }
     }'
 ```
 4. Launch job.
