@@ -23,7 +23,7 @@ curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/runners' \
 --data '{
   "name": "kriten-xmas-example",
   "image": "kubecodeio/kriten-xmas:0.1",
-  'branch": "main",
+  "branch": "main",
   "gitURL": "https://github.com/kriten-io/kriten-community-toolkit.git"
 }'
 ```
