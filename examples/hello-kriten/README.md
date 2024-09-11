@@ -8,7 +8,7 @@ Where $KRITEN_URL is set to the URL of your Kriten instance.
 
 1. Login
 ```console
-curl -c ./token.txt $KRITEN_URL'/api/v1/login' \
+curl -c ./token.txt -X POST $KRITEN_URL'/api/v1/login' \
 --header 'Content-Type: application/json' \
 --data '{
   "username": "root",
@@ -18,7 +18,7 @@ curl -c ./token.txt $KRITEN_URL'/api/v1/login' \
 ```
 2. Create a runner which references a Python image and the git repository.
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/runners' \
+curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/runners' \
 --header 'Content-Type: application/json' \
 --data '{
   "name": "python-3.9",
@@ -34,7 +34,7 @@ curl -b ./token.txt $KRITEN_URL'/api/v1/runners' \
 ```
 3. Create a task that references the runner and the command to run the script.
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/tasks' \
+curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/tasks' \
 --header 'Content-Type: application/json' \
 --data '{
   "name": "hello-kriten",
@@ -44,7 +44,7 @@ curl -b ./token.txt $KRITEN_URL'/api/v1/tasks' \
 ```
 4. Launch job.
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/hello-kriten' \
+curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/jobs/hello-kriten' \
 --header 'Content-Type: application/json' \
 --data '{
   "agent_name": "Ethan Hunt",
@@ -57,7 +57,7 @@ curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/hello-kriten' \
 ```
 5. Read the job output.
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/hello-kriten-ks67g' \
+curl -b ./token.txt -X GET $KRITEN_URL'/api/v1/jobs/hello-kriten-ks67g' \
 --header 'Content-Type: application/json'
 ```
    which returns a message.
@@ -87,7 +87,7 @@ curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/hello-kriten-ks67g' \
 
   To return job stdout as text, append /log to the URL
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/hello-kriten-ks67g/log' \
+curl -b ./token.txt -GET $KRITEN_URL'/api/v1/jobs/hello-kriten-ks67g/log' \
 --header 'Content-Type: application/json'
 ```
   which returns a message.
