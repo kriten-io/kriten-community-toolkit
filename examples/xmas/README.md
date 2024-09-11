@@ -5,7 +5,6 @@ A seasonal greeting
 ## To run on Kriten:
 
 Where $KRITEN_URL is set to the URL of your Kriten instance.
-eg. `export KRITEN_URL=http://kriten-community.kriten.io`
 
 1. Login
 ```console
@@ -22,9 +21,10 @@ curl -c ./token.txt $KRITEN_URL'/api/v1/login' \
 curl -b ./token.txt $KRITEN_URL'/api/v1/runners' \
 --header 'Content-Type: application/json' \
 --data '{
-  "name": "kriten-xmas-examples",
-  "image": "evolvere/kriten-xmas:0.2",
-  "gitURL": "https://github.com/kriten-io/kriten-examples.git"
+  "name": "kriten-xmas-example",
+  "image": "kubecodeio/kriten-xmas:0.1",
+  'branch": "main",
+  "gitURL": "https://github.com/kriten-io/kriten-community-toolkit.git"
 }'
 ```
 3. Create a task that references the runner and the command to run the script.
@@ -32,16 +32,28 @@ curl -b ./token.txt $KRITEN_URL'/api/v1/runners' \
 curl -b ./token.txt $KRITEN_URL'/api/v1/tasks' \
 --header 'Content-Type: application/json' \
 --data '{
-  "name": "xmas",
-  "command": "python xmas/xmas.py",
-  "runner": "kriten-xmas-examples",
-  "synchronous": true
-  }
-}'
+      "name": "merry-xmas",
+      "command": "python examples/xmas/xmas.py",
+      "runner": "kriten-xmas-example",
+        "schema": {
+          "required": [
+            "from"
+          ],
+          "properties": {
+            "from": {
+              "type": "string", 
+                "pattern": "^[A-Za-z0-9-]+$",
+                  "minLength": 1
+              }
+          },
+          "additionalProperties": false
+        }
+      "synchronous": true
+    }'
 ```
 4. Launch job.
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/xmas' \
+curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/merry-xmas' \
 --header 'Content-Type: application/json' \
 --data '{
   "from": "Steve"
