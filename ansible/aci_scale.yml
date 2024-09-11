@@ -1,0 +1,34 @@
+- name: Parse Input Variables
+  hosts: localhost
+  gather_facts: no
+  vars:
+    - input_vars: "{{ lookup('ansible.builtin.env', 'EXTRA_VARS')}}"
+
+  tasks:
+   
+    - name: Reading target hosts from input vars and storing as localhost fact
+      set_fact:
+         input_vars: "{{ input_vars }}"
+
+
+- name: Cisco ACI metrics
+  hosts: "{{ hostvars['localhost']['input_vars']['aci_fabric'] }}"
+  gather_facts: no
+  strategy: linear
+  connection: local
+
+  tasks:
+  
+    - name: Collect Cisco ACI scalability metrics
+      aci_collector:
+        hostip: '{{ ansible_host }}'
+        hostname: '{{ inventory_hostname }}'
+        username: '{{ aci_user }}'
+        password: '{{ aci_pass }}'
+      register: collector_result
+      delegate_to: localhost
+      no_log: false
+      
+    - name: Debug response
+      debug:
+        msg: "^JSON {{collector_result | to_json }} ^JSON"
