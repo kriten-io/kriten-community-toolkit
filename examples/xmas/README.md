@@ -8,7 +8,7 @@ Where $KRITEN_URL is set to the URL of your Kriten instance.
 
 1. Login
 ```console
-curl -c ./token.txt $KRITEN_URL'/api/v1/login' \
+curl -c ./token.txt -X POST $KRITEN_URL'/api/v1/login' \
 --header 'Content-Type: application/json' \
 --data '{
   "username": "root",
@@ -18,7 +18,7 @@ curl -c ./token.txt $KRITEN_URL'/api/v1/login' \
 ```
 2. Create a runner which references a Python image and the git repository.
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/runners' \
+curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/runners' \
 --header 'Content-Type: application/json' \
 --data '{
   "name": "kriten-xmas-example",
@@ -29,7 +29,7 @@ curl -b ./token.txt $KRITEN_URL'/api/v1/runners' \
 ```
 3. Create a task that references the runner and the command to run the script.
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/tasks' \
+curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/tasks' \
 --header 'Content-Type: application/json' \
 --data '{
       "name": "merry-xmas",
@@ -53,7 +53,7 @@ curl -b ./token.txt $KRITEN_URL'/api/v1/tasks' \
 ```
 4. Launch job.
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/merry-xmas' \
+curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/jobs/merry-xmas' \
 --header 'Content-Type: application/json' \
 --data '{
   "from": "Steve"
@@ -65,7 +65,7 @@ curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/merry-xmas' \
 ```
 5. Read the job output.
 ```console
-curl -b ./token.txt $KRITEN_URL'/api/v1/jobs/xmas-dx982/log' \
+curl -b ./token.txt -X GET $KRITEN_URL'/api/v1/jobs/xmas-dx982/log' \
 --header 'Content-Type: application/json'
 ```
    which returns a message.
