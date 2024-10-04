@@ -1,0 +1,27 @@
+---
+- name: Read extra_vars
+  hosts: localhost
+  gather_facts: no
+  vars:
+    input_vars: "{{ lookup('ansible.builtin.env', 'EXTRA_VARS')}}"
+
+  tasks:
+    - name: Reading target hosts from input vars and storing as localhost fact
+      set_fact:
+         target_hosts: "{{ input_vars['target_hosts'] }}"
+
+- name: Show Version
+  hosts: "{{ hostvars['localhost']['target_hosts'] }}"
+  gather_facts: false
+  connection: network_cli
+
+  tasks:
+    - name: Run 'show version' command on remote devices
+      eos_command:
+        commands: "show version"
+      register: show_version
+
+    - name: debug
+      debug: 
+        #msg: "{{ show_version.stdout.0 }}"
+        var: show_version.stdout.0

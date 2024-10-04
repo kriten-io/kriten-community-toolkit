@@ -1,0 +1,5 @@
+export NETBOX_TOKEN=a08684c4649c091e201f1eeb4eb5c18531e6d1b3
+export NETBOX_API=http://192.168.10.55:8000/
+export EXTRA_VARS='{"target_hosts": "all"}'
+
+ansible-playbook -i netbox_inv.yml show_version.yml -e EXTRA_VARS -v

@@ -1,0 +1,138 @@
+---
+- name: Git Pull
+  hosts: localhost
+  gather_facts: no
+  any_errors_fatal: true
+  vars:
+    - input_vars: "{{ lookup('ansible.builtin.env', 'EXTRA_VARS')}}"
+    - github_pat: "{{ lookup('ansible.builtin.file', '/etc/secret/github_pat')}}"
+    - github_userid: "{{ lookup('ansible.builtin.file', '/etc/secret/github_userid')}}"
+    - github_repo: "{{ lookup('ansible.builtin.file', '/etc/secret/github_repo')}}"
+
+  tasks:
+  
+    - name: Reading target hosts from input vars and storing as localhost fact
+      set_fact:
+         target_hosts: "{{ input_vars['target_hosts'] }}"
+      
+    - name: Git config - credentials
+      git_config:
+        name: credential.helper
+        scope: global
+        value: 'store'
+    
+    - name: Add a line to a file if the file does not exist, without passing regexp
+      ansible.builtin.lineinfile:
+        path: "~/.git-credentials"
+        line: "https://{{github_userid}}:{{github_pat}}@github.com"
+        mode: "0600"
+        create: yes
+
+    - name: Git clone
+      ansible.builtin.command: "git clone {{github_repo}} /tmp/network_backup"
+      
+- name: Network Configs Backup
+  hosts: "{{ hostvars['localhost']['target_hosts'] }}"
+  connection: network_cli
+  any_errors_fatal: true
+  gather_facts: no
+  vars:
+    - ansible_user: "{{ lookup('ansible.builtin.file', '/etc/secret/network_username')}}"
+    - ansible_password: "{{ lookup('ansible.builtin.file', '/etc/secret/network_password')}}"
+    - ansible_become: yes
+    - ansible_become_method: enable
+
+  tasks:
+
+    - name: Cisco NXOS Backup
+      nxos_config:
+        backup: yes
+        backup_options:
+          dir_path: "/tmp/network_backup/nxos/{{ inventory_hostname }}/"
+          filename: "{{ inventory_hostname }}.cfg"
+      when: ansible_network_os == "nxos"
+
+    - name: Cisco NXOS remove timestamp from config
+      lineinfile:
+        path: "/tmp/network_backup/nxos/{{ inventory_hostname }}/{{ inventory_hostname }}.cfg"
+        state: absent
+        regexp: '^!Time'
+      when: ansible_network_os == "nxos"
+
+    - name: Cisco IOS Backup
+      ios_config:
+        backup: yes
+        backup_options:
+          dir_path: "/tmp/network_backup/ios/{{ inventory_hostname }}/"
+          filename: "{{ inventory_hostname }}.cfg"
+      when: ansible_network_os == "ios"
+
+    - name: Arista Backup
+      eos_config:
+        backup: yes
+        backup_options:
+          dir_path: "/tmp/network_backup/eos/{{ inventory_hostname }}/"
+          filename: "{{ inventory_hostname }}.cfg"
+      when: ansible_network_os == "eos"
+
+    - name: Cisco ASA Backup
+      asa_config:
+        backup: yes
+        backup_options:
+          dir_path: "/tmp/network_backup/asa/{{ inventory_hostname }}/"
+          filename: "{{ inventory_hostname }}.cfg"
+      when: ansible_network_os == "asa"
+
+- name: Git Add, Commit, Push
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  any_errors_fatal: true
+  vars:
+    - github_username: "{{ lookup('ansible.builtin.file', '/etc/secret/github_username')}}"
+    - github_email: "{{ lookup('ansible.builtin.file', '/etc/secret/github_email')}}"
+  
+  tasks:
+    - name: Git Status Check
+      command:
+        cmd: "git status"
+        chdir: "/tmp/network_backup"
+      register: gitstatus
+             
+    - name: Git Add, Commit and Push Block
+
+      block:
+        - name: Set Git Config Email
+          git_config:
+            name: user.email
+            scope: global
+            value: '{{ github_email }}'
+      
+        - name: Set Git Config User
+          git_config:
+            name: user.name
+            scope: global
+            value: '{{ github_username }}'
+
+        - name: Set Git Config Push Default
+          git_config:
+            name: push.default
+            scope: global
+            value: simple
+
+        - name: Git - Adding
+          command:
+            cmd: 'git add *'
+            chdir: "/tmp/network_backup"
+
+        - name: Git - commiting
+          command: 
+            cmd: 'git commit -m "Ansible Backup"'
+            chdir: "/tmp/network_backup"
+
+        - name: Git - push
+          command:
+            cmd: 'git push'
+            chdir: "/tmp/network_backup"
+
+      when: gitstatus.stdout.find("nothing to commit") == -1

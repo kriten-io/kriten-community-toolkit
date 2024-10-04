@@ -1,0 +1,21 @@
+---
+- name: Read extra_vars
+  hosts: localhost
+  gather_facts: no
+  vars:
+    input_vars: "{{ lookup('ansible.builtin.env', 'EXTRA_VARS')}}"
+
+  tasks:
+    - name: Reading target hosts from input vars and storing as localhost fact
+      set_fact:
+         target_hosts: "{{ input_vars['target_hosts'] }}"
+
+- name: Compare intended state in NetBox to actual device state and show delta
+  hosts: "{{ hostvars['localhost']['target_hosts'] }}"
+  gather_facts: false
+  connection: network_cli
+
+  roles:
+    - role: ACTUAL_STATE
+    - role: INTENDED_STATE
+    - role: COMPARE_STATES
