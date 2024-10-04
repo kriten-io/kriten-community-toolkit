@@ -50,6 +50,23 @@ This playbook uses NetBox as the inventory. Make sure the devices have the corre
 ```
 
 ## To run using NetBox Plugin
+For installation details [Kriten NetBox Plugin](https://github.com/kriten-io/kriten-netbox-plugin)
+
+### Check devices are in NetBox
+
+![Check devices in NetBox](images/Add-devices-to-NetBox.png)
+
+### Add the runner
+
+![Add runner](images/Add-netbox-ansible-runner.png)
+
+### Add the task
+
+![Add task](images/Add-netbox-ansible-compare-configs-task.png)
+
+### Add the job
+
+![Add job](images/Add-netbox-ansible-compare-configs-job.png)
 
 
 
