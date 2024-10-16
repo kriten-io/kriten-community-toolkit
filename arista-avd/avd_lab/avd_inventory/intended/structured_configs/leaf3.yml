@@ -1,0 +1,277 @@
+hostname: leaf3
+is_deployed: true
+router_bgp:
+  as: '65103'
+  router_id: 192.0.255.131
+  bgp:
+    default:
+      ipv4_unicast: false
+  maximum_paths:
+    paths: 4
+    ecmp: 4
+  peer_groups:
+  - name: IPv4-UNDERLAY-PEERS
+    type: ipv4
+    password: $1c$caHDPKDBzOjl6ZrDQLicDQ==
+    maximum_routes: 12000
+    send_community: all
+  - name: EVPN-OVERLAY-PEERS
+    type: evpn
+    update_source: Loopback0
+    bfd: true
+    password: $1c$caHDPKDBzOjl6ZrDQLicDQ==
+    send_community: all
+    maximum_routes: 0
+    ebgp_multihop: 3
+  address_family_ipv4:
+    peer_groups:
+    - name: IPv4-UNDERLAY-PEERS
+      activate: true
+    - name: EVPN-OVERLAY-PEERS
+      activate: false
+  redistribute_routes:
+  - source_protocol: connected
+    route_map: RM-CONN-2-BGP
+  neighbors:
+  - ip_address: 172.31.255.128
+    peer_group: IPv4-UNDERLAY-PEERS
+    remote_as: '65001'
+    peer: spine1
+    description: spine1_Ethernet3/1
+  - ip_address: 172.31.255.130
+    peer_group: IPv4-UNDERLAY-PEERS
+    remote_as: '65001'
+    peer: spine2
+    description: spine2_Ethernet3/1
+  - ip_address: 192.0.255.1
+    peer_group: EVPN-OVERLAY-PEERS
+    peer: spine1
+    description: spine1
+    remote_as: '65001'
+  - ip_address: 192.0.255.2
+    peer_group: EVPN-OVERLAY-PEERS
+    peer: spine2
+    description: spine2
+    remote_as: '65001'
+  address_family_evpn:
+    peer_groups:
+    - name: EVPN-OVERLAY-PEERS
+      activate: true
+  vrfs:
+  - name: TEST_VRF
+    router_id: 192.0.255.131
+    rd: 192.0.255.131:10
+    route_targets:
+      import:
+      - address_family: evpn
+        route_targets:
+        - '10:10'
+      export:
+      - address_family: evpn
+        route_targets:
+        - '10:10'
+    redistribute_routes:
+    - source_protocol: connected
+  vlans:
+  - id: 150
+    tenant: TENANT_A
+    rd: 192.0.255.131:10150
+    route_targets:
+      both:
+      - 10150:10150
+    redistribute_routes:
+    - learned
+  - id: 200
+    tenant: TENANT_A
+    rd: 192.0.255.131:10200
+    route_targets:
+      both:
+      - 10200:10200
+    redistribute_routes:
+    - learned
+static_routes:
+- vrf: MGMT
+  destination_address_prefix: 0.0.0.0/0
+  gateway: 192.168.123.1
+service_routing_protocols_model: multi-agent
+ip_routing: true
+daemon_terminattr:
+  cvaddrs:
+  - 192.168.122.241:9910
+  cvauth:
+    method: key
+    key: qwerty
+  cvvrf: MGMT
+  smashexcludes: ale,flexCounter,hardware,kni,pulse,strata
+  ingestexclude: /Sysdb/cell/1/agent,/Sysdb/cell/2/agent
+  disable_aaa: false
+vlan_internal_order:
+  allocation: ascending
+  range:
+    beginning: 1006
+    ending: 1199
+ip_name_servers:
+- ip_address: 8.8.8.8
+  vrf: MGMT
+spanning_tree:
+  mode: mstp
+  mst_instances:
+  - id: '0'
+    priority: 4096
+local_users:
+- name: cvpadmin
+  privilege: 15
+  role: network-admin
+  sha512_password: $6$aQjjIocu2Pxl0baz$.3hUsqFqET6CHtNoc2nKIrmwPY39NYBaG.l2dX1hmiUc46lWorrG7V25b5XeqwSCJnRs4pOe9teK1/5RK8mve/
+vrfs:
+- name: MGMT
+  ip_routing: false
+- name: TEST_VRF
+  tenant: TENANT_A
+  ip_routing: true
+management_interfaces:
+- name: Management0
+  description: oob_management
+  shutdown: false
+  vrf: MGMT
+  ip_address: 192.168.123.23/24
+  gateway: 192.168.123.1
+  type: oob
+management_api_http:
+  enable_vrfs:
+  - name: MGMT
+  enable_https: true
+ethernet_interfaces:
+- name: Ethernet49/1
+  peer: spine1
+  peer_interface: Ethernet3/1
+  peer_type: spine
+  description: P2P_LINK_TO_SPINE1_Ethernet3/1
+  shutdown: false
+  mtu: 1500
+  type: routed
+  ip_address: 172.31.255.129/31
+- name: Ethernet50/1
+  peer: spine2
+  peer_interface: Ethernet3/1
+  peer_type: spine
+  description: P2P_LINK_TO_SPINE2_Ethernet3/1
+  shutdown: false
+  mtu: 1500
+  type: routed
+  ip_address: 172.31.255.131/31
+- name: Ethernet1/1
+  peer: host21
+  peer_interface: leaf3_Ethernet1/1
+  peer_type: server
+  port_profile: ACCESS_PROFILE
+  description: host21_leaf3_Ethernet1/1
+  shutdown: false
+  type: port-channel-member
+  channel_group:
+    id: 11
+    mode: active
+- name: Ethernet1/2
+  peer: host22
+  peer_interface: leaf3_Ethernet1/2
+  peer_type: server
+  port_profile: VLAN150_PROFILE
+  description: host22_leaf3_Ethernet1/2
+  shutdown: false
+  type: port-channel-member
+  channel_group:
+    id: 12
+    mode: active
+loopback_interfaces:
+- name: Loopback0
+  description: EVPN_Overlay_Peering
+  shutdown: false
+  ip_address: 192.0.255.131/32
+- name: Loopback1
+  description: VTEP_VXLAN_Tunnel_Source
+  shutdown: false
+  ip_address: 192.0.254.3/32
+- name: Loopback100
+  description: TEST_VRF_VTEP_DIAGNOSTICS
+  shutdown: false
+  vrf: TEST_VRF
+  ip_address: 10.255.1.3/32
+prefix_lists:
+- name: PL-LOOPBACKS-EVPN-OVERLAY
+  sequence_numbers:
+  - sequence: 10
+    action: permit 192.0.255.128/25 eq 32
+  - sequence: 20
+    action: permit 192.0.254.0/24 eq 32
+route_maps:
+- name: RM-CONN-2-BGP
+  sequence_numbers:
+  - sequence: 10
+    type: permit
+    match:
+    - ip address prefix-list PL-LOOPBACKS-EVPN-OVERLAY
+router_bfd:
+  multihop:
+    interval: 300
+    min_rx: 300
+    multiplier: 3
+vlans:
+- id: 150
+  name: TENANT_A_BGP_TO_COMPUTE
+  tenant: TENANT_A
+- id: 200
+  name: TENANT_A_TEST_L2_ONLY_VLAN
+  tenant: TENANT_A
+ip_igmp_snooping:
+  globally_enabled: true
+ip_virtual_router_mac_address: 00:1c:73:00:dc:01
+vlan_interfaces:
+- name: Vlan150
+  tenant: TENANT_A
+  tags:
+  - leaf3
+  - leaf4
+  description: TENANT_A_BGP_TO_COMPUTE
+  shutdown: false
+  ip_address_virtual: 10.100.150.1/24
+  vrf: TEST_VRF
+vxlan_interface:
+  Vxlan1:
+    description: leaf3_VTEP
+    vxlan:
+      udp_port: 4789
+      source_interface: Loopback1
+      vlans:
+      - id: 150
+        vni: 10150
+      - id: 200
+        vni: 10200
+      vrfs:
+      - name: TEST_VRF
+        vni: 10
+virtual_source_nat_vrfs:
+- name: TEST_VRF
+  ip_address: 10.255.1.3
+port_channel_interfaces:
+- name: Port-Channel11
+  description: host21_leaf3_to_host21
+  type: switched
+  shutdown: false
+  mode: access
+  vlans: '200'
+  evpn_ethernet_segment:
+    identifier: 0000:0000:43fb:64ab:210c
+    route_target: 43:fb:64:ab:21:0c
+  lacp_id: 43fb.64ab.210c
+- name: Port-Channel12
+  description: host22_leaf3_to_host22
+  type: switched
+  shutdown: false
+  mode: access
+  vlans: '150'
+  evpn_ethernet_segment:
+    identifier: 0000:0000:4640:0623:ea6b
+    route_target: 46:40:06:23:ea:6b
+  lacp_id: 4640.0623.ea6b
+metadata:
+  platform: cEOS
