@@ -25,6 +25,3 @@ tenants:
       200:
         name: TENANT_A_TEST_L2_ONLY_VLAN
         tags: ['l2_only']
-      210:
-        name: TENANT_A_TEST_L2_ONLY_VLAN
-        tags: ['l2_only']
