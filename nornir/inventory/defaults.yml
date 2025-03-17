@@ -1,0 +1,4 @@
+---
+platform: arista_eos
+username: ansible
+password: ansible
