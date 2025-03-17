@@ -33,7 +33,7 @@ curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/tasks' \
 --header 'Content-Type: application/json' \
 --data '{
   "name": "nornir-sh-ip-int",
-  "command": "cd nornit; python sh-ip-int.py",
+  "command": "cd nornir; python sh-ip-int.py",
   "runner": "nornir-3.5.0"
 }'
 ```
