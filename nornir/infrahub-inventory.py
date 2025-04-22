@@ -11,7 +11,7 @@ def main():
         inventory={
             "plugin": "InfrahubInventory",
             "options": {
-                "address": "http://192.168.10.59:8000",  # Infrahub API URL
+                "address": "http://192.168.10.57:8000",  # Infrahub API URL
                 "token": "1838a9d1-21e5-686c-3967-c51ef722c266",  # Infrahub API token
                 "host_node": {"kind": "InfraDevice"},  # Infrahub Node kind to map to Nornir Hosts
                 "schema_mappings": [
