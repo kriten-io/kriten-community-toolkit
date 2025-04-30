@@ -22,6 +22,7 @@ def filter_by_infrahub_node_id(host: Host, node_id: str) -> bool:
     
 def main():
     extra_vars = os.getenv("EXTRA_VARS")
+    print("Extra Vars: ", extra_vars)
     extra_vars = json.loads(extra_vars)
     token = os.getenv("INFRAHUB_API_TOKEN")
   
