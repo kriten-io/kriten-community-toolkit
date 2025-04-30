@@ -6,6 +6,7 @@ from nornir import InitNornir
 from nornir.core.inventory import Host
 from nornir_infrahub.plugins.tasks import get_artifact
 from nornir_utils.plugins.functions import print_result
+from nornir_napalm.plugins.tasks import napalm_configure
 
 
 def filter_by_infrahub_node_id(host: Host, node_id: str) -> bool:
