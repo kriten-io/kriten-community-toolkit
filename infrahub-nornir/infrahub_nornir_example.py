@@ -53,8 +53,14 @@ def main():
 
     nr = nr.filter(filter_func=filter_by_infrahub_node_id, node_id=node_id)
 
+    name = list(nr.inventory.hosts.keys())[0]
+    host = nr.inventory.hosts[name]
     result = nr.run(task=get_artifact, artifact_id=artifact_id)
+    config = result[name][0]
+
+    result = nr.run(task=napalm_configure, configuration=config, dry_run=False)
     print_result(result)
+
         
     
 if __name__ == "__main__":
