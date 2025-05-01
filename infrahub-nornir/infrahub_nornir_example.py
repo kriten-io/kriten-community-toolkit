@@ -57,7 +57,7 @@ def main():
     name = list(nr.inventory.hosts.keys())[0]
     host = nr.inventory.hosts[name]
     result = nr.run(task=get_artifact, artifact_id=artifact_id)
-    config = result[name][0]
+    config = result[name][0].split("\n")
 
     result = nr.run(task=napalm_configure, configuration=config, dry_run=False)
     print_result(result)
