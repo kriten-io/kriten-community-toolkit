@@ -28,6 +28,9 @@ def main():
     print("Extra Vars: ", extra_vars)
     extra_vars = json.loads(extra_vars)
     token = os.getenv("INFRAHUB_API_TOKEN")
+    infrahub_url = os.getenv("INFRAHUB_URL")
+    username = os.getenv("USERNAME")
+    password = os.getenv("PASSWORD")
   
     data = extra_vars.get("data", {})
     node_id = data.get("target_id")
@@ -43,7 +46,7 @@ def main():
         inventory={
             "plugin": "InfrahubInventory",
             "options": {
-                "address": "http://192.168.10.57:8000",
+                "address": infrahub_url,
                 "token": token,
                 "host_node": {"kind": "InfraDevice"},
                 "schema_mappings": [
@@ -54,8 +57,8 @@ def main():
         }
     )
 
-    nr.inventory.defaults.username = "admin"
-    nr.inventory.defaults.password = "admin"
+    nr.inventory.defaults.username = username
+    nr.inventory.defaults.password = password
 
     nr = nr.filter(filter_func=filter_by_infrahub_node_id, node_id=node_id)
 
