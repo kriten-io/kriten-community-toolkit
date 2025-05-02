@@ -8,6 +8,7 @@ from nornir.core.inventory import Host
 from nornir_infrahub.plugins.tasks import get_artifact
 from nornir_utils.plugins.functions import print_result
 from nornir_napalm.plugins.tasks import napalm_configure
+from napalm import get_network_driver
 
 
 def filter_by_infrahub_node_id(host: Host, node_id: str) -> bool:
@@ -53,9 +54,13 @@ def main():
         }
     )
 
+    nr.inventory.defaults.username = "admin"
+    nr.inventory.defaults.password = "admin"
+
     nr = nr.filter(filter_func=filter_by_infrahub_node_id, node_id=node_id)
 
     name = list(nr.inventory.hosts.keys())[0]
+
     host = nr.inventory.hosts[name]
     result = nr.run(task=get_artifact, artifact_id=artifact_id)
     config = str(result[name][0])
@@ -70,8 +75,6 @@ def main():
     
     result = nr.run(task=napalm_configure, configuration=config, dry_run=False)
     print_result(result)
-
-        
     
 if __name__ == "__main__":
     main()
