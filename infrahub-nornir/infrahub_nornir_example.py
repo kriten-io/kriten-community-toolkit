@@ -10,7 +10,6 @@ from nornir_utils.plugins.functions import print_result
 from nornir_napalm.plugins.tasks import napalm_configure
 from napalm import get_network_driver
 
-
 def filter_by_infrahub_node_id(host: Host, node_id: str) -> bool:
     node = host.get("InfrahubNode")
     if not node:
@@ -18,7 +17,6 @@ def filter_by_infrahub_node_id(host: Host, node_id: str) -> bool:
     if not hasattr(node, "id"):
         raise ValueError(f"InfrahubNode {node} does not have an id")
     return node.id == node_id
-
     
 def main():
     # Data from the webhook is passed in the EXTRA_VARS environment variable
