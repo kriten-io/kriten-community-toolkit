@@ -62,19 +62,18 @@ def main():
     nr = nr.filter(filter_func=filter_by_infrahub_node_id, node_id=node_id)
     # Extract the device name
     name = list(nr.inventory.hosts.keys())[0]
-    print("name:", name)
     host = nr.inventory.hosts[name]
+    # Get the startup-config artifact
     result = nr.run(task=get_artifact, artifact_id=artifact_id)
     config = str(result[name][0])
-
+    # Set TLS args
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     #context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
-
     # Using the EOS default ciphers
     context.set_ciphers('AES256-SHA:DHE-RSA-AES256-SHA:AES128-SHA:DHE-RSA-AES128-SHA')
-    
+    # Use Nornir NAPALM to configure the switch
     result = nr.run(task=napalm_configure, configuration=config, dry_run=False)
     print_result(result)
     
