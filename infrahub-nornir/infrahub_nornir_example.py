@@ -15,33 +15,32 @@ def filter_by_infrahub_node_id(host: Host, node_id: str) -> bool:
     node = host.get("InfrahubNode")
     if not node:
         raise ValueError(f"Host {host.name} does not contain a valid InfrahubNode")
-
-
     if not hasattr(node, "id"):
         raise ValueError(f"InfrahubNode {node} does not have an id")
-
     return node.id == node_id
 
     
 def main():
+    # Data from the webhook is passed in the EXTRA_VARS environment variable
     extra_vars = os.getenv("EXTRA_VARS")
     print("Extra Vars: ", extra_vars)
     extra_vars = json.loads(extra_vars)
+    # The secrets are passed to the container from the Kriten runner
     token = os.getenv("INFRAHUB_API_TOKEN")
     infrahub_url = os.getenv("INFRAHUB_URL")
     username = os.getenv("USERNAME")
     password = os.getenv("PASSWORD")
-  
+    # Set node_id and artifact_id  
     data = extra_vars.get("data", {})
     node_id = data.get("target_id")
     artifact_id = data.get("node_id")
-
+    # Both node_id and artifact_id are needed
     if not node_id:
         raise RuntimeError(f"There is no target_id provided in extra_vars")
 
     if not artifact_id:
         raise RuntimeError(f"There is no artifact_id provided in extra_vars")
-
+    # Use the Nornir Infrahub plugin to collect device inventory
     nr = InitNornir(
         inventory={
             "plugin": "InfrahubInventory",
@@ -56,14 +55,14 @@ def main():
             },
         }
     )
-
+    # Set Nornir variables for switch username and password
     nr.inventory.defaults.username = username
     nr.inventory.defaults.password = password
-
+    # Filter the inventory to find the device which has updated 
     nr = nr.filter(filter_func=filter_by_infrahub_node_id, node_id=node_id)
-
+    # Extract the device name
     name = list(nr.inventory.hosts.keys())[0]
-
+    print("name:", name)
     host = nr.inventory.hosts[name]
     result = nr.run(task=get_artifact, artifact_id=artifact_id)
     config = str(result[name][0])
