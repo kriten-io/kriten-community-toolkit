@@ -91,6 +91,8 @@
   vars:
     - github_username: "{{ lookup('ansible.builtin.file', '/etc/secret/github_username')}}"
     - github_email: "{{ lookup('ansible.builtin.file', '/etc/secret/github_email')}}"
+    - kriten_token: "{{ lookup('ansible.builtin.env', 'KRITEN_TOKEN')}}"
+    - kriten_url: "{{ lookup('ansible.builtin.env', 'KRITEN_URL')}}"
   
   tasks:
     - name: Set fact
@@ -144,13 +146,28 @@
 
       when: gitstatus.stdout.find("nothing to commit") == -1
     
-    - name: Print bacup not necessary message
-      debug:
+    - name: Set Slack Message
+      set_fact:
          msg: "BACKUP JOB: Nothing to backup, no config changes since last backup."
       when: completed_backup|bool == false
       
-    - name: Print backup successful message
+    - name: Set Slack Message #2
       set_fact:
          msg: "BACKUP JOB: successfully completed for target hosts: {{ hostvars['localhost']['target_hosts'] }}"
       when: completed_backup|bool == true
       
+    - name: Send slack message
+      uri:
+        url: "{{kriten_url}}"
+        method: POST
+        validate_certs: no
+        return_content: yes
+        body_format: json
+        headers:
+          Content-Type: "application/json"
+          Token: "{{ kriten_token }}"
+        body:
+          msg: "{{ msg }}"
+        status_code: 200, 201, 307
+      register: kriten_response
+      no_log: False
