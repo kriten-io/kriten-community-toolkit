@@ -144,13 +144,13 @@
 
       when: gitstatus.stdout.find("nothing to commit") == -1
     
-    - name: Print bacup not necessary message
+    - name: Print backup not necessary message
       debug:
          msg: "BACKUP JOB: Nothing to backup, no config changes since last backup."
       when: completed_backup|bool == false
       
     - name: Print backup successful message
-      set_fact:
+      debug:
          msg: "BACKUP JOB: successfully completed for target hosts: {{ hostvars['localhost']['target_hosts'] }}"
       when: completed_backup|bool == true
       
