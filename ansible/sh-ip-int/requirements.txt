@@ -1,0 +1,13 @@
+ansible-core==2.21.4
+bcrypt==5.0.0
+cffi==2.1.1
+cryptography==50.0.1
+invoke==3.0.3
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+packaging==26.3
+paramiko==5.0.0
+pycparser==3.0
+PyNaCl==1.6.2
+PyYAML==6.0.3
+resolvelib==1.2.1

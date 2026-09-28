@@ -1,0 +1,1 @@
+docker buildx build --platform  linux/amd64,linux/arm64 -t kubecodeio/ansible:2.21 --push .
