@@ -1,0 +1,15 @@
+---
+- name: Gather IP Interface Brief from Arista Switches
+  hosts: arista_switches
+  gather_facts: false
+
+  tasks:
+    - name: Run show ip interface brief
+      arista.eos.eos_command:
+        commands:
+          - show ip interface brief
+      register: eos_output
+
+    - name: Display the command output
+      ansible.builtin.debug:
+        msg: "{{ eos_output.stdout_lines[0] }}"
