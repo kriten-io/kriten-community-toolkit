@@ -37,9 +37,9 @@ curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/tasks' \
   "runner": "nornir-3.5.0"
 }'
 ```
-4. Launch job.
+4. Launch task.
 ```console
-curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/jobs/nornir-sh-ip-int' \
+curl -b ./token.txt -X POST $KRITEN_URL'/api/v1/tasks/nornir-sh-ip-int/run' \
 --header 'Content-Type: application/json' \
 --data '{
   "group": "LEAF"
