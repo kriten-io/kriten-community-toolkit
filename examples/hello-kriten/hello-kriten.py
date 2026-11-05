@@ -1,6 +1,7 @@
 import os
 import json
 from pprint import pprint
+from pathlib import Path
 
 return_result = {}
 secrets = {}
@@ -26,20 +27,26 @@ if extra_vars:
 else:
     print("No extra vars provided.")
     return_result['extra_vars'] = {}
-    
+
 print('\n')
 
 # Kriten exposes task secrets to the Job container as files stored in /etc/secret/ directory.
 # Following code reads those files and prints in format 'filename:content'
 
-secret_files = os.listdir(secrets_path)
+# Create a Path object
+path = Path(secrets_path)
 
-if secret_files:
-    for file_name in secret_files:
-        if os.path.isfile(secrets_path + file_name):
-            with open(secrets_path + file_name, 'r') as f:
-                value = f.read()
-                secrets[file_name] = value
+# Check if the path exists (can be a file OR a directory)
+if path.exists():
+
+    secret_files = os.listdir(secrets_path)
+
+    if secret_files:
+        for file_name in secret_files:
+            if os.path.isfile(secrets_path + file_name):
+                with open(secrets_path + file_name, 'r') as f:
+                    value = f.read()
+                    secrets[file_name] = value
 
 else:
     print("No task secrets provided.")
