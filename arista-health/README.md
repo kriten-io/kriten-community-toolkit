@@ -6,7 +6,7 @@ Credentials and inventory come from environment variables:
 
   ```PASSWORD```    - login password for the switches
 
-  ```CVP_URL```     - Arista CVP host or URL, e.g. www.cv-prod-us-central1-c.arista.io
+  ```CVP_URL```     - Arista CVP host or URL, e.g. www.arista.io
 
   ```CVP_TOKEN```   - Arista CVP API token, sent as a Bearer token
 
