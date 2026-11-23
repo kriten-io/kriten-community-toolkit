@@ -2,11 +2,15 @@
 """Collect health information from Arista EOS switches.
 
 Credentials and inventory come from environment variables:
-  USERNAME    - login user for the switches
-  PASSWORD    - login password for the switches
+  ARISTA_USERNAME    - login user for the switches
+  ARISTA_PASSWORD    - login password for the switches
+  INVENTORY_SOURCE - CVP or INFRAHUB
   CVP_URL     - Arista CVP host or URL, e.g. www.arista.io
   CVP_TOKEN   - Arista CVP API token, sent as a Bearer token
-The inventory is pulled from CVP as [{"device": fqdn, "ip": ip_address}, ...].
+  INFRAHUB_ADDRESS -  "http://192.168.10.59:8000"
+  INFRAHUB_API_TOKEN - "06438eb2-8019-4776-878c-0941b1f1d1ec"
+
+The inventory is pulled from CVP or INFRAHUB as [{"device": fqdn, "ip": ip_address}, ...].
 """
 
 import argparse
@@ -16,6 +20,9 @@ import os
 import re
 import sys
 from datetime import datetime
+
+import os
+from infrahub_sdk import Config, InfrahubClientSync
 
 import requests
 import urllib3
@@ -279,6 +286,26 @@ class Arista:
         return {vr['interface']: vr['protocolStatus'] for vr in routers}
 
 
+def get_inventory():
+    # Default INFRAHUB_API_TOKEN: "06438eb2-8019-4776-878c-0941b1f1d1ec"
+    config = Config(
+        address=os.getenv("INFRAHUB_ADDRESS", "http://192.168.10.59:8000"),
+        api_token=os.getenv("INFRAHUB_API_TOKEN", "06438eb2-8019-4776-878c-0941b1f1d1ec"),
+    )
+    client = InfrahubClientSync(config=config)
+
+    # Retrieve all devices (change kind to "DcimDevice" if using the DCIM schema)
+    # prefetch_relationships=True loads cardinality-one peers (e.g., site, platform)
+    devices = client.all(kind="AvdLeafswitch", prefetch_relationships=True)
+    inventory = []
+    for device in devices:
+        name = device.name.value
+        primary_address = str(device.primary_address.peer.address.value)
+        ip = primary_address.split("/")[0]
+        inventory.append({"device": name, "ip": ip})
+
+    return inventory
+ 
 def get_cvp_inventory():
     cvp_url = os.environ.get('CVP_URL')
     token = os.environ.get('CVP_TOKEN')
@@ -301,8 +328,8 @@ def get_cvp_inventory():
 
 
 def get_credentials():
-    username = os.environ.get('USERNAME')
-    password = os.environ.get('PASSWORD')
+    username = os.environ.get('ARISTA_USERNAME')
+    password = os.environ.get('ARISTA_PASSWORD')
     if not username or not password:
         sys.exit('ERROR: USERNAME and PASSWORD environment variables must be set.')
     return username, password
@@ -324,9 +351,15 @@ def parse_args():
 
 
 def main():
+    inventory_source = os.getenv("INVENTORY_SOURCE", "CVP")
+
     args = parse_args()
     username, password = get_credentials()
-    inventory = get_cvp_inventory()
+    match inventory_source:
+        case "CVP":
+            inventory = get_cvp_inventory()
+        case "INFRAHUB":
+            inventory = get_inventory()
     logger = setup_logging(args.debug)
     beat = Arista(username, password, inventory, logger=logger, debug=args.debug)
     beat.collect_data()
