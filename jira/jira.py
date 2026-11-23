@@ -16,8 +16,7 @@ if extra_vars:
 else:
     sys.exit()
 
-
-
+EMAIL = extra_vars_data["EMAIL"]
 
 URL = f"https://{JIRA_INSTANCE}/rest/servicedeskapi/request"
 
