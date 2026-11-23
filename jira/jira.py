@@ -6,16 +6,17 @@ import sys
 
 # 1. Configuration & Authentication
 
+# Secrets
+JIRA_INSTANCE = os.environ.get("JIRA_INSTANCE")
+API_TOKEN = os.environ.get("API_TOKEN")
+# Args
 extra_vars = os.environ.get('EXTRA_VARS')
-
 if extra_vars:
     extra_vars_data = json.loads(extra_vars)
 else:
     sys.exit()
 
-JIRA_INSTANCE = extra_vars_data["JIRA_INSTANCE"]
-EMAIL = extra_vars_data["EMAIL"]
-API_TOKEN = extra_vars_data["API_TOKEN"]
+
 
 
 URL = f"https://{JIRA_INSTANCE}/rest/servicedeskapi/request"
