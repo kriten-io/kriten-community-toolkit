@@ -17,6 +17,8 @@ else:
     sys.exit()
 
 EMAIL = extra_vars_data["EMAIL"]
+SUMMARY = extra_vars_data["SUMMARY"]
+DESCRIPTION = extra_vars_data["DESCRIPTION"]
 
 URL = f"https://{JIRA_INSTANCE}/rest/servicedeskapi/request"
 
@@ -32,8 +34,8 @@ payload = {
     "serviceDeskId": "1",        # Numeric ID of your Service Desk portal
     "requestTypeId": "1",      # Numeric ID of the specific Request Type
     "requestFieldValues": {
-        "summary": "Access issue with production database",
-        "description": "Unable to connect to the DB using the standard service account credentials."
+        "summary": SUMMARY,
+        "description": DESCRIPTION
     },
     # Optional fields (Requires specific agent/admin permissions):
     # "raiseOnBehalfOf": "customer-account-id", 
