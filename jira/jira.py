@@ -1,6 +1,6 @@
 import json
 import requests
-from requests.auth import 
+from requests.auth import HTTPBasicAuth
 import sys
 
 # 1. Configuration & Authentication
