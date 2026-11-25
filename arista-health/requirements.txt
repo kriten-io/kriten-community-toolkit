@@ -1,0 +1,4 @@
+nornir
+nornir-infrahub
+requests
+urllib3
