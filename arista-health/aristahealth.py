@@ -288,24 +288,30 @@ class Arista:
 
 def get_inventory():
     # Default INFRAHUB_API_TOKEN: "06438eb2-8019-4776-878c-0941b1f1d1ec"
+    address=os.getenv("INFRAHUB_ADDRESS", "http://192.168.10.59:8000")
+    api_token=os.getenv("INFRAHUB_API_TOKEN", "06438eb2-8019-4776-878c-0941b1f1d1ec")
+    if not address or not api_token:
+        sys.exit('ERROR: INFRAHUB_ADDRESS and INFRAHUB_API_TOKEN environment variables must be set.')
     config = Config(
-        address=os.getenv("INFRAHUB_ADDRESS", "http://192.168.10.59:8000"),
-        api_token=os.getenv("INFRAHUB_API_TOKEN", "06438eb2-8019-4776-878c-0941b1f1d1ec"),
+        address=address,
+        api_token=api_token
     )
     client = InfrahubClientSync(config=config)
-
     # Retrieve all devices (change kind to "DcimDevice" if using the DCIM schema)
     # prefetch_relationships=True loads cardinality-one peers (e.g., site, platform)
-    devices = client.all(kind="AvdLeafswitch", prefetch_relationships=True)
+    kind="AvdLeafswitch"
+    devices = client.all(kind=kind, prefetch_relationships=True)
     inventory = []
     for device in devices:
         name = device.name.value
         primary_address = str(device.primary_address.peer.address.value)
         ip = primary_address.split("/")[0]
         inventory.append({"device": name, "ip": ip})
-
+    if not inventory:
+        sys.exit(f'ERROR: No devices of kind {kind} found in Infrahub inventory.')
+    print(f"Infrahub inventory from {address}")
     return inventory
- 
+
 def get_cvp_inventory():
     cvp_url = os.environ.get('CVP_URL')
     token = os.environ.get('CVP_TOKEN')
@@ -324,8 +330,8 @@ def get_cvp_inventory():
                  for device in response.json() if device.get('fqdn') and device.get('ipAddress')]
     if not inventory:
         sys.exit('ERROR: No devices with fqdn and ipAddress found in CVP.')
+    print(f"CVP inventory from {cvp_url}")
     return inventory
-
 
 def get_credentials():
     username = os.environ.get('ARISTA_USERNAME')
@@ -352,7 +358,6 @@ def parse_args():
 
 def main():
     inventory_source = os.getenv("INVENTORY_SOURCE", "CVP")
-
     args = parse_args()
     username, password = get_credentials()
     match inventory_source:
