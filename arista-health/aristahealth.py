@@ -357,7 +357,13 @@ def parse_args():
 
 
 def main():
-    inventory_source = os.getenv("INVENTORY_SOURCE", "CVP")
+    extra_vars = os.environ.get('EXTRA_VARS')
+    # Default to Infrahub
+    inventory_source = "INFRAHUB"
+    if extra_vars:
+        extra_vars_data = json.loads(extra_vars)
+        inventory_source = extra_vars_data.get('INVENTORY_SOURCE')
+
     args = parse_args()
     username, password = get_credentials()
     match inventory_source:
